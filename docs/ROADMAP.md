@@ -1,24 +1,20 @@
 # Roadmap
 
-Each step introduces one MCP idea. Tick it off, and write what you learned in `LEARNING_LOG.md`.
+Each phase is one branch and one PR, introduces one MCP idea, and ends with an entry in
+`LEARNING_LOG.md`. The reasoning behind each phase is in [PLAN.md](PLAN.md) §8.
 
-- [x] **0. Check for an official `.twb` schema.** Found it:
-  [tableau/tableau-document-schemas](https://github.com/tableau/tableau-document-schemas),
-  with versions up to `2026_2`.
-- [ ] **1. Empty server.** `uv` project, a FastMCP server with one trivial tool, registered in the
-  client's MCP config. *Concepts: what a server is, stdio transport, how the client discovers tools.*
-- [ ] **2. `inspect-workbook`** (read-only). Dashboards, sheets, zones (in pixels), fields and
-  captions, actions, filters. Run it on real workbooks (from outside the repo) to learn their
-  structure. *Concepts: tool name, description, input schema, structured results.*
-- [ ] **3. `validate-workbook`.** Check against the XSD, plus the known load errors in `AGENTS.md`
-  and missing captions. Optional: Tableau Cloud's `validateWorkbookAndUpload` endpoint.
-  *Concepts: errors the model can act on.*
-- [ ] **4. `set-caption`** (first write tool). Lock-file check → backup → patch → field diff →
-  validate. *Concepts: write tools, guardrails in code, tool annotations (destructive, idempotent).*
-- [ ] **5. Template harvesting.** A helper that diffs two saves of the same workbook and shows the
-  XML Desktop produced for one change. It feeds every later write tool.
-- [ ] **6. Bigger write tools**, each from a harvested template: `add-filter` (hidden filter
-  sheet + multiple-values dropdown), `add-nav-button`, `add-filter-action`, `set-zone-geometry`.
-- [ ] **7. Prep flows.** `inspect-flow`, then `create-sql-flow` (Custom SQL input → no-op Clean →
-  output) from a known-good `.tfl` template.
-- [ ] **8. Package it.** Run from any project; decide stdio vs Docker.
+- [x] **0. Plan.** Research, a grilling session, and the agreed design in `PLAN.md`; MIT licence.
+- [ ] **1. Foundation.** `uv` project, `MCPServer` over stdio, the `twb-status` tool, byte-faithful
+  load/save, and the `tam roundtrip` command. Registered in Claude Code and pi. Spike: which version
+  format Desktop 2026.2 accepts for generated files. *Concepts: what a server is, stdio, tool schemas
+  from type hints, structured output, testing with the in-memory client.*
+- [ ] **2. `twb-validate`.** Schema chosen by build, manifest gates, references and identity; one fixture
+  per known load error; the `tam://checks` resource. *Concepts: errors the model can act on; resources.*
+- [ ] **3. `twb-inspect` and `desktop-open-and-check`.** Read a workbook's structure; open a file in
+  Desktop and report its load errors. *Concepts: keeping results small; a tool that reaches another
+  machine.*
+- [ ] **4. Milestone 1: generate a small dashboard.** `twb-create`, `twb-add-sheet` (first presets),
+  `twb-add-dashboard`, house style. Done when the owner's dashboard idea opens clean in Desktop.
+  *Concepts: composing small tools into a workflow.*
+- [ ] **5+. Decided after milestone 1.** Candidates: patch tools, more chart types, full lint and diff,
+  the Tableau Public corpus fetch, Prep flows, the harvest command, evals.

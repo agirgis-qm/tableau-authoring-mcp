@@ -28,3 +28,31 @@ against the source.
 Two ways to learn Tableau's rules:
 - **Examples give templates** (what to write): save, make one change in Desktop, save, diff.
 - **Errors give checks** (what to refuse): every rejection becomes a validation rule.
+
+## 2026-09-29: Research, and what shaped the plan
+
+**MCP, as of the 2026-07-28 spec and Python SDK v2.2**
+- The high-level server class is now `MCPServer`; v1 called it `FastMCP`.
+- A tool's input schema comes from its Python type hints. If it returns a Pydantic model, the SDK also
+  publishes an **output schema**, and each result carries typed data (`structuredContent`) next to the
+  usual text.
+- Two kinds of error: raising `ToolError` sends a readable message the model can act on; any other
+  exception becomes an opaque protocol error. So every expected failure should be a `ToolError`.
+- The protocol has no session. If calls need shared state, a tool returns a handle and later calls pass
+  it back. For us the state is simply the file on disk.
+- Tools carry **annotations** (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`).
+  They're hints for the client, not guarantees.
+- Anthropic's advice on tools for agents: few workflow-sized tools rather than one per API call, human
+  names instead of IDs, small results, and errors that say how to fix the call.
+
+**Tableau's file format**
+- Desktop always writes `version='18.1'`, whatever the release. The real format is in the
+  `<!-- build … -->` comment.
+- Features newer than that format are switched on in `<document-format-change-manifest>`. A valid
+  element can still fail to load if its entry is missing: `<manual-sort>` needs `SortTagCleanup`. That
+  was the real cause of a load error in the communities build.
+- Passing the XSD is necessary, not sufficient. In a test, the XSD caught 4 of 7 historical load errors;
+  the rest need reference and manifest checks.
+- Tableau's own Codex plugin and tableau-mcp already hold a lot of prior art: XSDs for every release,
+  Desktop before/after diffs, and a Desktop mode in tableau-mcp that will be able to load XML straight
+  into Desktop once Desktop supports it.
