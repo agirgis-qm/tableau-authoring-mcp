@@ -56,3 +56,41 @@ Two ways to learn Tableau's rules:
 - Tableau's own Codex plugin and tableau-mcp already hold a lot of prior art: XSDs for every release,
   Desktop before/after diffs, and a Desktop mode in tableau-mcp that will be able to load XML straight
   into Desktop once Desktop supports it.
+
+## 2026-09-29: Phase 1, a server with one tool
+
+**How the pieces connect**
+- An MCP server is just a program. The client (Claude Code, pi) starts it as a subprocess and they talk
+  JSON-RPC over its stdin and stdout; that's the **stdio transport**. So a stdio server must never print to
+  stdout: stdout *is* the protocol. Logs go to stderr.
+- The client finds the server through config: a `.mcp.json` with `"command": "tableau-authoring-mcp"`.
+  Claude Code reads `.mcp.json` from the project and its parent folders; pi reads it too once a parent is
+  listed in `settings.ancestorConfigRoots`, and asks you to approve each project server first.
+- On connect the client calls `tools/list`. What the model sees for `twb-status` is built entirely from the
+  Python function: its name and title from the decorator, its description from the docstring, the input
+  schema from the type hints (`Annotated[str, Field(description=...)]`), and an **output schema** from the
+  returned Pydantic model.
+
+**Results and errors**
+- Returning a Pydantic model gives two things: `structuredContent` (typed JSON matching the output schema,
+  for programs) and a text copy (for models and older clients).
+- `raise ToolError("File not found: … Check the path")` comes back as a normal result with `isError: true`
+  and that message, which the model can act on. Any other exception is an opaque protocol error, so every
+  failure a user can cause is turned into a ToolError.
+- Annotations (`readOnlyHint=True`, `openWorldHint=False`) tell the client the tool only reads local
+  files, so it can skip or relax confirmation prompts. They're hints, not enforcement.
+
+**Testing**
+- `async with Client(mcp) as c: await c.call_tool(...)` runs the real server in memory: same tool list,
+  same schemas, same error handling, no subprocess. A separate check launches the installed command over
+  stdio, the way the clients do.
+
+**The file layer**
+- Re-serializing a Tableau workbook with lxml changed bytes nobody touched: only 35 of 182 files came back
+  identical (CDATA, CRLF line endings, entity choices). So a `Document` records where every node sits in
+  the original bytes (expat reports offsets) and copies unchanged nodes verbatim; only changed nodes are
+  serialized, in Tableau's style. Result: 160 of 160 corpus workbooks round-trip byte for byte even when
+  every element is rebuilt from its parts. With every start tag re-serialized by our code, 154 of 160
+  still match; the 6 that don't were written by our old regex scripts, not by Tableau.
+- Desktop's `.~name__pid.twbr` files are autosaves that outlive crashes. From Linux we can't tell a live
+  lock from a stale one, so `twb-status` says "unknown" rather than guessing, and mentions the lock's age.

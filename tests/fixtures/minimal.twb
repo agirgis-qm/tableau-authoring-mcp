@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<!-- build 20262.26.0819.2015                               -->
+<workbook original-version='18.1' source-build='2026.2.0 (20262.26.0819.2015)' source-platform='mac' version='18.1' xmlns:user='http://www.tableausoftware.com/xml/user'>
+  <document-format-change-manifest>
+    <SheetIdentifierTracking />
+    <SortTagCleanup />
+    <WindowsPersistSimpleIdentifiers />
+  </document-format-change-manifest>
+  <preferences>
+    <preference name='ui.encoding.shelf.height' value='24' />
+  </preferences>
+  <datasources>
+    <datasource caption='Sample Orders' inline='true' name='sqlproxy.0abc123def456ghi789jkl0mnop' version='18.1'>
+      <repository-location id='SampleOrders' path='/t/example/datasources' revision='1.0' site='example' />
+      <connection channel='https' class='sqlproxy' dbname='SampleOrders' port='443' server='example.invalid' username=''>
+        <relation name='sqlproxy' table='[sqlproxy]' type='table' />
+      </connection>
+      <aliases enabled='yes' />
+      <column caption='Order Region' datatype='string' name='[REGION]' role='dimension' type='nominal' />
+      <column caption='Sales' datatype='real' name='[SALES]' role='measure' type='quantitative' />
+      <column caption='Big Orders' datatype='integer' name='[Calculation_1]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='IF [SALES] &gt; 100 THEN 1 ELSE 0 END // &quot;big&quot; means &gt;100' />
+      </column>
+      <attribute datatype='string' name='note'>&quot;<![CDATA[<raw & unescaped>]]>&quot;</attribute>
+    </datasource>
+  </datasources>
+  <worksheets>
+    <worksheet name='Sales by Region'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Sample Orders' name='sqlproxy.0abc123def456ghi789jkl0mnop' />
+          </datasources>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Bar' />
+          </pane>
+        </panes>
+        <rows>[sqlproxy.0abc123def456ghi789jkl0mnop].[none:REGION:nk]</rows>
+        <cols>[sqlproxy.0abc123def456ghi789jkl0mnop].[sum:SALES:qk]</cols>
+      </table>
+      <simple-id uuid='{11111111-2222-3333-4444-555555555555}' />
+    </worksheet>
+  </worksheets>
+  <dashboards>
+    <dashboard enable-sort-zone-taborder='true' name='Overview'>
+      <style />
+      <size sizing-mode='automatic' />
+      <zones>
+        <zone h='100000' id='1' type-v2='layout-basic' w='100000' x='0' y='0'>
+          <!-- a comment inside the zone tree -->
+          <zone h='100000' id='2' name='Sales by Region' w='100000' x='0' y='0' />
+        </zone>
+      </zones>
+      <simple-id uuid='{66666666-7777-8888-9999-000000000000}' />
+    </dashboard>
+  </dashboards>
+  <windows source-height='30'>
+    <window class='worksheet' name='Sales by Region'>
+      <simple-id uuid='{AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE}' />
+    </window>
+    <window class='dashboard' maximized='true' name='Overview'>
+      <viewpoints>
+        <viewpoint name='Sales by Region' />
+      </viewpoints>
+      <simple-id uuid='{FFFFFFFF-0000-1111-2222-333333333333}' />
+    </window>
+  </windows>
+</workbook>
