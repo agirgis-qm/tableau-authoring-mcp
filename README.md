@@ -39,6 +39,20 @@ In development. The agreed design is in [docs/PLAN.md](docs/PLAN.md), progress i
 [docs/ROADMAP.md](docs/ROADMAP.md), deferred ideas in [docs/V2.md](docs/V2.md), and what has been
 learned along the way in [docs/LEARNING_LOG.md](docs/LEARNING_LOG.md).
 
+## Install (development)
+
+```bash
+uv sync                      # dev environment for tests
+uv tool install -e .         # puts `tableau-authoring-mcp` (the server) and `tam` (dev commands) on PATH
+uv run pytest                # tests; add TAM_CORPUS=<folder> to round-trip a local corpus too
+```
+
+Register the server with your MCP client as a stdio command, for example in a `.mcp.json`:
+
+```json
+{ "mcpServers": { "tableau-authoring": { "type": "stdio", "command": "tableau-authoring-mcp" } } }
+```
+
 ## Data policy
 
 This repo is public. No real workbooks, flows, extracts, connection details, or data go in it;
